@@ -1,0 +1,11 @@
+{
+  "name": "react-sandbox",
+  "version": "0.1.0",
+  "dependencies": {
+    "bootstrap": "3.x",
+    "jquery": "2.x",
+    "qunit": "1.x",
+    "fontawesome": "4.x",
+    "lodash": "3.x"
+  }
+}
