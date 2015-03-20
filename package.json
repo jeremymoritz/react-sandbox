@@ -4,12 +4,22 @@
   "description": "React Sandbox",
   "homepage": "http://moritzcompany.com",
   "author": "Moritz Company",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.4.3",
+    "express": "^4.4.5"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jeremymoritz/react-sandbox.git"
   },
   "devDependencies": {
-    "gulp": "^3.8.11",
-    "jshint-stylish": "~0.2.0"
+    "del": "^1.1.1",
+    "gulp": "^3.x",
+    "gulp-jade": "^1.0.0",
+    "gulp-jscs": "^1.4.0",
+    "gulp-jshint": "^1.9.2",
+    "gulp-react": "^3.0.1",
+    "gulp-sass": "^1.3.3"
   }
 }

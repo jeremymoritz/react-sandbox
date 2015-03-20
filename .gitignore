@@ -193,3 +193,4 @@ $RECYCLE.BIN/
 **/build
 **/coverage
 **/configuration.json
+/dist/**
