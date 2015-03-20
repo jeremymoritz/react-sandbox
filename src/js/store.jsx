@@ -33,15 +33,61 @@ var ProductCategory = React.createClass({
 	}
 });
 
+var SearchBar = React.createClass({
+	handleChange: function handleChange() {
+		this.props.onUserInput(
+			this.refs.filterText.getDOMNode().value,
+			this.refs.inStockOnly.getDOMNode().checked
+		);
+	},
+	render: function render() {
+		return (
+			<div className="searchBar">
+				<form role="form">
+					<input 
+						type="text" 
+						ref="filterText" 
+						placeholder="Search..." 
+						value={this.props.filterText} 
+						onChange={this.handleChange}
+					/>
+					<br />
+					<label>
+						<input 
+							type="checkbox" 
+							ref="inStockOnly" 
+							checked={this.props.inStockOnly} 
+							onChange={this.handleChange}
+						/>
+						{' '}
+						Only show products in stock
+					</label>
+				</form>
+			</div>
+		);
+	}
+});
+
 var ProductTable = React.createClass({
 	render: function render() {
-	  var groupedProducts = _.groupBy(this.props.products, 'category');
-	  var productCategories = [];
-	  _.forOwn(groupedProducts, function eachProp(products, categoryName) {
-	  	productCategories.push(
-	  		<ProductCategory products={products} category={categoryName} />
-	  	);
-	  });
+		var self = this;
+		var filteredProducts = this.props.products;
+		if (this.props.inStockOnly) {	//	handle inStockOnly
+			filteredProducts =  _.filter(filteredProducts, 'stocked');
+		}
+		if (this.props.filterText) {	//	handle filterText
+			filteredProducts = _.filter(filteredProducts, function filterProducts(prod) {
+				return _.includes(prod.name, self .props.filterText);
+			});
+		}
+
+		var groupedProducts = _.groupBy(filteredProducts, 'category');
+		var productCategories = [];
+		_.forOwn(groupedProducts, function eachProp(products, categoryName) {
+			productCategories.push(
+				<ProductCategory products={products} category={categoryName} />
+			);
+		});
 
 		return (
 			<div className="productTable">
@@ -59,54 +105,53 @@ var ProductTable = React.createClass({
 	}
 });
 
-var SearchBar = React.createClass({
-	render: function render() {
-		return (
-			<div className="searchBar">
-				<input type="text" ref="searchText" placeholder="Search..." />
-				<br />
-				<label>
-					<input type="checkbox" ref="inStockOnly" /> 
-					Only show products in stock
-				</label>
-			</div>
-		);
-	}
-});
-
 var FilterableProductTable = React.createClass({
-  loadProductsFromServer: function() {
-    $.ajax({
-      url: this.props.url,
-      dataType: 'json',
-      success: function(data) {
-        this.setState({products: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
-      }.bind(this)
-    });
-  },
-  getInitialState: function() {
-    return {products: []};
-  },
-  componentDidMount: function() {
-    this.loadProductsFromServer();
-    setInterval(this.loadProductsFromServer, this.props.pollInterval);
-  },
+	loadProductsFromServer: function() {
+		$.ajax({
+			url: this.props.url,
+			dataType: 'json',
+			success: function(data) {
+				this.setState({products: data});
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+	},
+	getInitialState: function() {
+		return {
+			products: [],
+			filterText: '',
+			inStockOnly: false
+		};
+	},
+	handleUserInput: function handleUserInput(filterText, inStockOnly) {
+		this.setState({
+			filterText: filterText,
+			inStockOnly: inStockOnly
+		});
+	},
+	componentDidMount: function() {
+		this.loadProductsFromServer();
+		setInterval(this.loadProductsFromServer, this.props.pollInterval);
+	},
 	render: function render() {
 		return (
 			<div className="filterProductTable">
-				<SearchBar />
-				<ProductTable products={this.state.products} />
+				<SearchBar 
+					inStockOnly={this.state.inStockOnly} 
+					filterText={this.state.filterText} 
+					onUserInput={this.handleUserInput}
+				/>
+				<ProductTable products={this.state.products} inStockOnly={this.state.inStockOnly} filterText={this.state.filterText} />
 			</div>
 		);
 	}
 });
 
 React.render(
-  <FilterableProductTable url="resources/products.json" pollInterval={2000} />,
-  document.getElementById('store')
+	<FilterableProductTable url="resources/products.json" pollInterval={2000} />,
+	document.getElementById('store')
 );
 
 
